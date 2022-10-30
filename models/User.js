@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -11,15 +14,27 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true,'Please provide email'],
-        match: [/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'Please provide valid email'],
-        unique: true
+        match: [/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, 'Please provide valid email']
+        // unique: true
     },
     password: {
         type: String,
-        required: [true,'Please provide password'],
-        minlength: 6,
+        required: [true,'Please provide assword'],
+        minlength: 6
     }
 });
 
-module.exports = mongoose.model('user', userSchema);
+userSchema.pre('save', async function() {
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
+userSchema.methods.generateToken = function () {
+    return jwt.sign(
+        {userId:this._id, name:this.name}, 
+        process.env.JWT_SECRET, 
+        {expiresIn: '30d'}
+    );;
+}
+
+module.exports = mongoose.model('User', userSchema);
 
