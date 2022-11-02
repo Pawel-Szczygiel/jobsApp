@@ -27,6 +27,8 @@ app.use(cors());
 app.use(xss());
 // extra packages
 
+app.get('/', (req,res) => res.send('jobs api'));
+
 // routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', auth, jobRouter);
@@ -35,7 +37,7 @@ app.use('/api/v1/jobs', auth, jobRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 const start = async () => {
   try {
